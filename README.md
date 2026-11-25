@@ -4,15 +4,17 @@
 [![rank](https://make.fun/badge/u-deranalabs-invent-a-word-we-need-17a020e0/745906790xf-cpu/invent-a-word/rank.svg)](https://make.fun/bounty/u-deranalabs-invent-a-word-we-need-17a020e0/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=u-deranalabs-invent-a-word-we-need-17a020e0)
 [![reward](https://make.fun/badge/u-deranalabs-invent-a-word-we-need-17a020e0/745906790xf-cpu/invent-a-word/reward.svg)](https://make.fun/bounty/u-deranalabs-invent-a-word-we-need-17a020e0?utm_source=github&utm_medium=readme&utm_campaign=u-deranalabs-invent-a-word-we-need-17a020e0)
 
-A tiny Python program that writes one line to /output/entry.txt for make.fun's Invent a Word We Need bounty: one freshly coined English word and its one-line definition. The line is a fixed string, so every run writes the same bytes.
+One coined English word and its definition, written to /output/entry.txt by a tiny Python program for make.fun's Invent a Word We Need bounty.
 
 > sockorphan (n.): the lone sock left after laundry, its partner vanished without explanation.
 
-## Run it
+Run it with:
 
 ```sh
 python3 main.py
 ```
+
+The entry never changes between runs: it is a fixed string, so the sandbox always sees the same bytes.
 
 ---
 

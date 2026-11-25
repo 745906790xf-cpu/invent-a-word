@@ -1,66 +1,55 @@
 """Invent a Word We Need entry for make.fun.
 
-Writes one line to /output/entry.txt: a freshly coined English word
-with its one-line definition. The sandbox runs this program twice and
-both runs must write the same bytes, so the line is a fixed string
-with no randomness, clock, or network access. The word names a small
-household loss everyone recognises at once: the lone sock left after
-laundry, its partner vanished without explanation, a thing English
-has never had a single word for.
+A small program that writes one coined word and its definition to
+/output/entry.txt. The sandbox runs it twice and both runs must
+produce identical bytes, so the entry is a fixed string: no random
+choices, no clock, no network, no input of any kind.
 """
 
 import os
 
-MAX_CHARS = 140
-ENTRY_PATH = "/output/entry.txt"
-
-LINE = "sockorphan (n.): the lone sock left after laundry, its partner vanished without explanation."
-
-
-def check_line(line: str) -> str:
-    """Return the line unchanged, guarding the gate's limits.
-
-    The gate accepts UTF-8 text of 1 to 140 characters that is not
-    only white space, so fail loudly here rather than write an entry
-    the judge never sees.
-    """
-    if not line or len(line) > MAX_CHARS:
-        raise ValueError(
-            f"length rule failed: entry is {len(line)} characters, limit is {MAX_CHARS}"
-        )
-    if not line.strip():
-        raise ValueError("entry must not be only white space")
-    if line.strip() != line or "\n" in line or "\r" in line:
-        raise ValueError(
-            "single-line rule failed: entry has surrounding whitespace or a line break"
-        )
-    if any(ord(ch) < 32 for ch in line):
-        raise ValueError(
-            "control-character rule failed: entry contains a control character"
-        )
-    return line
+OUT_PATH = "/output/entry.txt"
+CHAR_LIMIT = 140
+ENTRY = "sockorphan (n.): the lone sock left after laundry, its partner vanished without explanation."
 
 
-def write_entry(path: str = ENTRY_PATH) -> None:
-    """Write the line as UTF-8 with no trailing newline, then verify it.
+def fail(message):
+    """Abort loudly instead of writing an entry the gate would drop."""
+    raise ValueError(message)
 
-    Read back what was written and compare bytes, so a partial write
-    is caught here instead of in the sandbox.
-    """
-    parent = os.path.dirname(path)
-    if parent:
-        os.makedirs(parent, exist_ok=True)
-    text = check_line(LINE)
-    with open(path, "w", encoding="utf-8", newline="") as handle:
+
+def validate(text):
+    """Check the entry against the gate before anything is written."""
+    if len(text) == 0:
+        fail("entry is empty")
+    if len(text) > CHAR_LIMIT:
+        fail(f"entry runs {len(text)} characters; the gate allows {CHAR_LIMIT}")
+    if text.strip() == "":
+        fail("entry is only whitespace")
+    if text != text.strip():
+        fail("entry has leading or trailing whitespace")
+    if "\n" in text or "\r" in text:
+        fail("entry spans more than one line")
+    for character in text:
+        if ord(character) < 32:
+            fail("entry holds a control character")
+    return text
+
+
+def save_entry():
+    """Write the entry as UTF-8 with no trailing newline, then read it back."""
+    folder = os.path.dirname(OUT_PATH)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+    text = validate(ENTRY)
+    with open(OUT_PATH, "w", encoding="utf-8", newline="") as handle:
         handle.write(text)
-    with open(path, "r", encoding="utf-8", newline="") as handle:
-        written = handle.read()
-    if written != text:
-        raise ValueError("read-back verification failed: written bytes differ")
-    if len(written.encode("utf-8")) != len(text.encode("utf-8")):
-        raise ValueError("read-back verification failed: byte length differs")
-    print(f"wrote {len(text)} characters, {len(text.split())} words to {path}")
+    with open(OUT_PATH, "r", encoding="utf-8", newline="") as handle:
+        stored = handle.read()
+    if stored != text:
+        fail("read-back mismatch: the stored bytes differ from the entry")
+    print(f"saved {len(text)} characters, {len(text.split())} words, to {OUT_PATH}")
 
 
 if __name__ == "__main__":
-    write_entry()
+    save_entry()
